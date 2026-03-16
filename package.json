@@ -9,7 +9,28 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "tsc && vite build && electron-builder"
+    "electron:build": "tsc --project tsconfig.electron.json && tsc && vite build && electron-builder"
+  },
+  "build": {
+    "appId": "com.kindleclipper.app",
+    "productName": "Kindle Clipper",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        { "target": "dmg", "arch": ["arm64", "x64"] },
+        { "target": "zip", "arch": ["arm64", "x64"] }
+      ]
+    },
+    "dmg": {
+      "title": "Kindle Clipper"
+    }
   },
   "dependencies": {
     "react": "^18.2.0",

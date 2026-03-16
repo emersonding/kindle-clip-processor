@@ -12,4 +12,28 @@ A simple script to organize Kindle clips by book title, print the organized note
 ### TODO
 [x] Add date filtering flag
 [] Add book title filtering flat
-[] Choose to print raw log or organized logs group by book   
+[] Choose to print raw log or organized logs group by book
+
+## Kindle Clipper App
+
+A GUI app for browsing and exporting Kindle highlights. Runs as a macOS desktop app (Electron) or standalone web app.
+
+### Requirements
+- Node.js 18+
+- npm 9+
+
+### Development
+```bash
+npm install
+npm run dev              # Web app only (Vite dev server)
+npm run electron:dev     # Full Electron app with hot reload
+```
+
+### Build
+```bash
+npm run build            # Web app build → dist/
+npm run electron:build   # macOS .dmg → release/
+```
+
+### Web version
+Open `dist/index.html` in a browser after running `npm run build`. File import uses the browser's file picker.
