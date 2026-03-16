@@ -1,7 +1,7 @@
 export interface Highlight {
   title: string;      // cleaned book title (email stripped)
   metadata: string;   // raw metadata line (location/page info in Chinese)
-  text: string;       // highlight text (may be empty for bookmarks)
+  text: string;       // highlight text (always non-empty — chunks with empty text are skipped during parsing)
   date: Date | null;  // parsed from Chinese date format
 }
 
@@ -11,7 +11,7 @@ export interface Book {
 }
 
 const CHUNK_DELIMITER = '==========';
-const EMAIL_REGEX = /\(.*?@.*?\)/g;
+const EMAIL_REGEX = /\([^)]*@[^)]*\)/g;
 const DATE_REGEX = /(\d+)年(\d+)月(\d+)日.*?(\d+):(\d+):(\d+)/;
 
 function stripEmptyStrings(lines: string[]): string[] {
@@ -24,9 +24,11 @@ function extractDate(metadata: string): Date | null {
   const year = parseInt(match[1], 10);
   const month = parseInt(match[2], 10) - 1; // 0-indexed
   const day = parseInt(match[3], 10);
-  const hour = parseInt(match[4], 10);
+  let hour = parseInt(match[4], 10);
   const min = parseInt(match[5], 10);
   const sec = parseInt(match[6], 10);
+  if (metadata.includes('下午') && hour !== 12) hour += 12;
+  if (metadata.includes('上午') && hour === 12) hour = 0;
   return new Date(year, month, day, hour, min, sec);
 }
 

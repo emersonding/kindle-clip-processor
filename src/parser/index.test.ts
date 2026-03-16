@@ -102,7 +102,7 @@ ${DELIMITER}`;
 
   test('date parsing: correct year/month/day/hour/minute from Chinese metadata', () => {
     const input = `挪威的森林
-- 您在第45页的标注 | 添加于 2016年3月1日星期二 下午2:30:00
+- 您在第45页的标注 | 添加于 2016年3月1日星期二 下午3:30:00
 
 生命的本质就是孤独。
 ${DELIMITER}`;
@@ -113,7 +113,7 @@ ${DELIMITER}`;
     assert.equal(date!.getFullYear(), 2016);
     assert.equal(date!.getMonth(), 2); // 0-indexed, March = 2
     assert.equal(date!.getDate(), 1);
-    assert.equal(date!.getHours(), 2);
+    assert.equal(date!.getHours(), 15);
     assert.equal(date!.getMinutes(), 30);
     assert.equal(date!.getSeconds(), 0);
   });
@@ -127,6 +127,20 @@ ${DELIMITER}`;
 
     const result = parseClippings(input);
     assert.equal(result[0].highlights[0].date, null);
+  });
+
+  test('multi-line highlight body is joined with newline', () => {
+    const input = `挪威的森林
+- 您在第50页的标注 | 添加于 2016年3月2日星期三 上午9:00:00
+
+第一行内容。
+第二行内容。
+${DELIMITER}`;
+
+    const result = parseClippings(input);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].highlights.length, 1);
+    assert.equal(result[0].highlights[0].text, '第一行内容。\n第二行内容。');
   });
 
   test('preserves order of first appearance for books', () => {
