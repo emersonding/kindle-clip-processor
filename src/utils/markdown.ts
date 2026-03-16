@@ -20,8 +20,18 @@ export function formatDate(date: Date | null): string {
  * > *YYYY-MM-DD HH:MM*
  */
 export function formatHighlight(h: Highlight): string {
-  const dateStr = h.date ? formatDate(h.date) : h.metadata
-  return `> ${h.text}\n> *${dateStr}*\n`
+  const textLines = h.text.split('\n').map(line => `> ${line}`).join('\n')
+  const dateLine = h.date ? `> *${formatDate(h.date)}*` : `> *${h.metadata}*`
+  return `${textLines}\n${dateLine}\n`
+}
+
+/**
+ * Format a book from its title and a list of highlights as markdown.
+ * Useful when the highlight list may differ from book.highlights (e.g. filtered).
+ */
+export function formatBookFromHighlights(title: string, highlights: Highlight[]): string {
+  if (highlights.length === 0) return `# ${title}\n`
+  return `# ${title}\n\n${highlights.map(formatHighlight).join('\n')}`
 }
 
 /**
@@ -36,11 +46,7 @@ export function formatHighlight(h: Highlight): string {
  * > *date*
  */
 export function formatBook(book: Book): string {
-  const lines: string[] = [`# ${book.title}\n`]
-  for (const h of book.highlights) {
-    lines.push(formatHighlight(h))
-  }
-  return lines.join('\n')
+  return formatBookFromHighlights(book.title, book.highlights)
 }
 
 /**

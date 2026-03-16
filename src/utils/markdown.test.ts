@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { formatDate, formatHighlight, formatBook, formatAll, slugify } from './markdown.ts'
+import { formatDate, formatHighlight, formatBook, formatBookFromHighlights, formatAll, slugify } from './markdown.ts'
 import type { Highlight, Book } from '../parser/index.ts'
 
 describe('formatDate', () => {
@@ -37,6 +37,17 @@ describe('formatHighlight', () => {
     const result = formatHighlight(h)
     assert.equal(result, '> Some highlight text.\n> *- raw metadata line*\n')
   })
+
+  test('prefixes every line of multiline text with >', () => {
+    const h: Highlight = {
+      title: 'My Book',
+      metadata: 'meta',
+      text: 'First line.\nSecond line.',
+      date: new Date(2020, 0, 1, 9, 0),
+    }
+    const result = formatHighlight(h)
+    assert.equal(result, '> First line.\n> Second line.\n> *2020-01-01 09:00*\n')
+  })
 })
 
 describe('formatBook', () => {
@@ -67,10 +78,71 @@ describe('formatBook', () => {
       '> Second highlight.\n> *2020-01-02 10:30*\n'
     assert.equal(result, expected)
   })
+
+  test('zero highlights produces only the title header', () => {
+    const book: Book = { title: 'Empty Book', highlights: [] }
+    assert.equal(formatBook(book), '# Empty Book\n')
+  })
+})
+
+describe('formatBookFromHighlights', () => {
+  test('zero highlights produces only the title header', () => {
+    assert.equal(formatBookFromHighlights('Empty Book', []), '# Empty Book\n')
+  })
+
+  test('produces correct markdown for given highlights', () => {
+    const highlights: Highlight[] = [
+      {
+        title: 'My Book',
+        metadata: 'meta1',
+        text: 'First highlight.',
+        date: new Date(2020, 0, 1, 9, 0),
+      },
+    ]
+    const result = formatBookFromHighlights('My Book', highlights)
+    assert.equal(result, '# My Book\n\n> First highlight.\n> *2020-01-01 09:00*\n')
+  })
 })
 
 describe('formatAll', () => {
-  test('joins two books with \\n\\n---\\n\\n', () => {
+  test('empty array produces empty string', () => {
+    assert.equal(formatAll([]), '')
+  })
+
+  test('joins two books with \\n---\\n\\n separator (inline literal)', () => {
+    const books: Book[] = [
+      {
+        title: 'Book One',
+        highlights: [
+          {
+            title: 'Book One',
+            metadata: 'meta',
+            text: 'Highlight one.',
+            date: new Date(2021, 0, 1, 8, 0),
+          },
+        ],
+      },
+      {
+        title: 'Book Two',
+        highlights: [
+          {
+            title: 'Book Two',
+            metadata: 'meta',
+            text: 'Highlight two.',
+            date: new Date(2021, 5, 15, 12, 0),
+          },
+        ],
+      },
+    ]
+    const result = formatAll(books)
+    const expected =
+      '# Book One\n\n> Highlight one.\n> *2021-01-01 08:00*\n' +
+      '\n---\n\n' +
+      '# Book Two\n\n> Highlight two.\n> *2021-06-15 12:00*\n'
+    assert.equal(result, expected)
+  })
+
+  test('joins two books with \\n---\\n\\n (delegating to formatBook)', () => {
     const books: Book[] = [
       {
         title: 'Book One',

@@ -6,7 +6,7 @@ import { Sidebar } from './components/Sidebar'
 import { BookDetail } from './components/BookDetail'
 import { HighlightList } from './components/HighlightList'
 import { Book } from './parser'
-import { formatHighlight, formatAll, slugify } from './utils/markdown'
+import { formatBookFromHighlights, formatAll, slugify } from './utils/markdown'
 
 // ---- Browser download helper ----
 
@@ -112,11 +112,7 @@ function App() {
   const handleCopyBook = async () => {
     if (!selectedBook) return
     try {
-      const lines: string[] = [`# ${selectedBook.title}\n`]
-      for (const h of filteredHighlights) {
-        lines.push(formatHighlight(h))
-      }
-      const md = lines.join('\n')
+      const md = formatBookFromHighlights(selectedBook.title, filteredHighlights)
       if (window.electronAPI) {
         await window.electronAPI.writeClipboard(md)
       } else {
@@ -131,11 +127,7 @@ function App() {
 
   const handleSaveBook = async (book: Book) => {
     try {
-      const lines: string[] = [`# ${book.title}\n`]
-      for (const h of filteredHighlights) {
-        lines.push(formatHighlight(h))
-      }
-      const md = lines.join('\n')
+      const md = formatBookFromHighlights(book.title, filteredHighlights)
       const filename = `${slugify(book.title)}.md`
       if (window.electronAPI) {
         const savePath = await window.electronAPI.showSaveDialog(filename)
