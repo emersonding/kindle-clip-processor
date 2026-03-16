@@ -6,32 +6,7 @@ import { Sidebar } from './components/Sidebar'
 import { BookDetail } from './components/BookDetail'
 import { HighlightList } from './components/HighlightList'
 import { Book } from './parser'
-
-// ---- Markdown helpers ----
-
-function formatHighlightMd(text: string, date: Date | null, metadata: string): string {
-  const dateStr = date
-    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-    : metadata
-  return `> ${text}\n> *${dateStr}*\n`
-}
-
-function bookToMarkdown(book: Book): string {
-  const lines: string[] = [`# ${book.title}\n`]
-  for (const h of book.highlights) {
-    lines.push(formatHighlightMd(h.text, h.date, h.metadata))
-  }
-  return lines.join('\n')
-}
-
-function allBooksToMarkdown(books: Book[]): string {
-  return books.map(bookToMarkdown).join('\n---\n\n')
-}
-
-function slugify(title: string): string {
-  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-  return slug || 'kindle-highlights'
-}
+import { formatHighlight, formatAll, slugify } from './utils/markdown'
 
 // ---- Browser download helper ----
 
@@ -104,7 +79,7 @@ function App() {
 
   const handleCopyAll = async () => {
     try {
-      const md = allBooksToMarkdown(books)
+      const md = formatAll(books)
       if (window.electronAPI) {
         await window.electronAPI.writeClipboard(md)
       } else {
@@ -119,7 +94,7 @@ function App() {
 
   const handleSaveAll = async () => {
     try {
-      const md = allBooksToMarkdown(books)
+      const md = formatAll(books)
       if (window.electronAPI) {
         const savePath = await window.electronAPI.showSaveDialog('kindle-highlights.md')
         if (!savePath) return
@@ -139,7 +114,7 @@ function App() {
     try {
       const lines: string[] = [`# ${selectedBook.title}\n`]
       for (const h of filteredHighlights) {
-        lines.push(formatHighlightMd(h.text, h.date, h.metadata))
+        lines.push(formatHighlight(h))
       }
       const md = lines.join('\n')
       if (window.electronAPI) {
@@ -158,7 +133,7 @@ function App() {
     try {
       const lines: string[] = [`# ${book.title}\n`]
       for (const h of filteredHighlights) {
-        lines.push(formatHighlightMd(h.text, h.date, h.metadata))
+        lines.push(formatHighlight(h))
       }
       const md = lines.join('\n')
       const filename = `${slugify(book.title)}.md`

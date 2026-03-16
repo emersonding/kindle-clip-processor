@@ -17,7 +17,7 @@ export function BookDetail({ book, highlightCount, onCopy, onSave }: BookDetailP
   }
 
   return (
-    <div className="book-detail-header">
+    <div className="book-detail book-detail-header">
       <div className="book-detail-info">
         <h2 className="book-detail-title">{book.title}</h2>
         <p className="book-detail-subtitle">
