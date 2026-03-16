@@ -1,39 +1,37 @@
 # kindle-clip-processor
 
-### Context
-A simple script to organize Kindle clips by book title, print the organized note and store to local file.
+Browse, search, filter, and export your Kindle highlights.
 
-> Recommend run with python3.
+Runs as a macOS desktop app (Electron) or standalone web app — same codebase.
 
-### How it works
-* Output organized note and store to resources: `python3 kindle_clipper_processor.py`
-* Filter out notes before a date: `python3 kindle_clipper_processor.py -d 2022-03-01`
+## Features
 
-### TODO
-[x] Add date filtering flag
-[] Add book title filtering flat
-[] Choose to print raw log or organized logs group by book
+- Parse `My Clippings.txt` exported from any Kindle device
+- Two-panel UI: book list sidebar + highlight content pane
+- Global keyword search and date range filter across all books
+- Markdown export per-book or all books (copy to clipboard or save as `.md`)
+- Auto-detect mounted Kindle at `/Volumes/Kindle/` (macOS)
+- Browser fallback — works without Electron via file picker and clipboard API
 
-## Kindle Clipper App
+## Screenshots
 
-A GUI app for browsing and exporting Kindle highlights. Runs as a macOS desktop app (Electron) or standalone web app.
+![English highlights view](docs/images/screenshot-1.png)
+![Chinese highlights view](docs/images/screenshot-2.png)
 
-### Requirements
-- Node.js 18+
-- npm 9+
+## Quick Start
 
-### Development
 ```bash
 npm install
-npm run dev              # Web app only (Vite dev server)
-npm run electron:dev     # Full Electron app with hot reload
+npm run electron:dev   # launch desktop app with hot reload
+npm test               # run all tests
 ```
 
-### Build
-```bash
-npm run build            # Web app build → dist/
-npm run electron:build   # macOS .dmg → release/
-```
+## More
 
-### Web version
-Open `dist/index.html` in a browser after running `npm run build`. File import uses the browser's file picker.
+- [Runbook](docs/runbook.md) — full command reference, env setup, troubleshooting
+- [Design Spec](docs/superpowers/specs/2026-03-16-kindle-clipper-design.md) — architecture, data model, security
+- [CLAUDE.md](CLAUDE.md) — developer and AI guide
+
+## Archive
+
+`archive/` contains the original Python CLI script (`kindle_clipper_processor.py`).
