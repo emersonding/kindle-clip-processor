@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, clipboard, nativeTheme } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, clipboard } from 'electron'
 import path from 'path'
 import fs from 'fs'
 
@@ -28,7 +28,8 @@ function createWindow() {
 
 // IPC handlers
 ipcMain.handle('show-open-dialog', async () => {
-  const result = await dialog.showOpenDialog({
+  const win = BrowserWindow.getFocusedWindow()
+  const result = await dialog.showOpenDialog(win!, {
     properties: ['openFile'],
     filters: [{ name: 'Text Files', extensions: ['txt'] }],
   })
@@ -36,19 +37,23 @@ ipcMain.handle('show-open-dialog', async () => {
 })
 
 ipcMain.handle('show-save-dialog', async (_, filename: string) => {
-  const result = await dialog.showSaveDialog({
+  const win = BrowserWindow.getFocusedWindow()
+  const result = await dialog.showSaveDialog(win!, {
     defaultPath: filename,
     filters: [{ name: 'Markdown', extensions: ['md'] }],
   })
-  return result.canceled ? null : result.filePath
+  return result.canceled ? null : (result.filePath ?? null)
 })
 
 ipcMain.handle('read-file', async (_, filePath: string) => {
-  return fs.readFileSync(filePath, 'utf-8')
+  if (!filePath.endsWith('.txt')) {
+    throw new Error('Only .txt files can be read')
+  }
+  return fs.promises.readFile(filePath, 'utf-8')
 })
 
 ipcMain.handle('save-file', async (_, filePath: string, content: string) => {
-  fs.writeFileSync(filePath, content, 'utf-8')
+  await fs.promises.writeFile(filePath, content, 'utf-8')
 })
 
 ipcMain.handle('write-clipboard', async (_, text: string) => {
@@ -57,14 +62,19 @@ ipcMain.handle('write-clipboard', async (_, text: string) => {
 
 // Kindle auto-detection: watch /Volumes for mount events
 function watchForKindle(win: BrowserWindow) {
+  if (process.platform !== 'darwin') return
   if (!fs.existsSync('/Volumes')) return
 
   let kindleWatcher: fs.FSWatcher | null = null
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
   const checkKindle = () => {
-    if (fs.existsSync(KINDLE_PATH)) {
-      win.webContents.send('kindle-connected', KINDLE_PATH)
-    }
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+      if (fs.existsSync(KINDLE_PATH)) {
+        win.webContents.send('kindle-connected', KINDLE_PATH)
+      }
+    }, 500)
   }
 
   try {
@@ -82,7 +92,6 @@ function watchForKindle(win: BrowserWindow) {
 }
 
 app.whenReady().then(() => {
-  nativeTheme.themeSource = 'light'
   const win = createWindow()
   watchForKindle(win)
 

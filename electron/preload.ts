@@ -16,7 +16,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeClipboard: (text: string): Promise<void> =>
     ipcRenderer.invoke('write-clipboard', text),
 
-  onKindleConnected: (callback: (filePath: string) => void): void => {
-    ipcRenderer.on('kindle-connected', (_event, filePath: string) => callback(filePath))
+  onKindleConnected: (callback: (filePath: string) => void): (() => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, filePath: string) => callback(filePath)
+    ipcRenderer.removeAllListeners('kindle-connected')
+    ipcRenderer.on('kindle-connected', listener)
+    return () => ipcRenderer.removeListener('kindle-connected', listener)
   },
 })
