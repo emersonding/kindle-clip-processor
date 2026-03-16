@@ -1,3 +1,6 @@
+# Worktrees
+.worktrees/
+
 # Output
 resource/*
 .idea/*
@@ -103,3 +106,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Electron app build output
+dist-electron/
+release/
+node_modules/
