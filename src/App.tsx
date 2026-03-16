@@ -79,7 +79,7 @@ function App() {
 
   const handleCopyAll = async () => {
     try {
-      const md = formatAll(books)
+      const md = formatAll(filteredBooks)
       if (window.electronAPI) {
         await window.electronAPI.writeClipboard(md)
       } else {
@@ -94,7 +94,7 @@ function App() {
 
   const handleSaveAll = async () => {
     try {
-      const md = formatAll(books)
+      const md = formatAll(filteredBooks)
       if (window.electronAPI) {
         const savePath = await window.electronAPI.showSaveDialog('kindle-highlights.md')
         if (!savePath) return
@@ -170,14 +170,14 @@ function App() {
           <button
             className="btn btn-secondary"
             onClick={handleCopyAll}
-            disabled={books.length === 0}
+            disabled={filteredBooks.length === 0}
           >
             📋 Copy All
           </button>
           <button
             className="btn btn-secondary"
             onClick={handleSaveAll}
-            disabled={books.length === 0}
+            disabled={filteredBooks.length === 0}
           >
             ⬇ Save All .md
           </button>

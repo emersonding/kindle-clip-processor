@@ -334,11 +334,12 @@ body {
    Book Detail Header
    ===================== */
 .book-detail {
-  flex: 1;
   display: flex;
+  flex-shrink: 0;
 }
 
 .book-detail--empty {
+  flex: 1;
   align-items: center;
   justify-content: center;
 }
