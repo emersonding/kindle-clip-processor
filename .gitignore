@@ -1,6 +1,10 @@
 # Worktrees
 .worktrees/
 
+# AI tool working dir
+.claude
+.superpowers/
+
 # Output
 resource/*
 .idea/*
