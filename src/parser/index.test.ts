@@ -1,6 +1,6 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseClippings } from './index.js';
+import { parseClippings } from './index.ts';
 
 const DELIMITER = '==========';
 
