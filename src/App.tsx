@@ -29,7 +29,8 @@ function allBooksToMarkdown(books: Book[]): string {
 }
 
 function slugify(title: string): string {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  return slug || 'kindle-highlights'
 }
 
 // ---- Browser download helper ----
@@ -57,6 +58,7 @@ function App() {
     dateFrom,
     dateTo,
     lastImported,
+    lastImportedAt,
     kindleConnected,
     books,
     loadFromText,
@@ -101,24 +103,32 @@ function App() {
   // --- Copy All ---
 
   const handleCopyAll = async () => {
-    const md = allBooksToMarkdown(books)
-    if (window.electronAPI) {
-      await window.electronAPI.writeClipboard(md)
-    } else {
-      await navigator.clipboard.writeText(md)
+    try {
+      const md = allBooksToMarkdown(books)
+      if (window.electronAPI) {
+        await window.electronAPI.writeClipboard(md)
+      } else {
+        await navigator.clipboard.writeText(md)
+      }
+    } catch (err) {
+      console.error('handleCopyAll failed:', err)
     }
   }
 
   // --- Save All ---
 
   const handleSaveAll = async () => {
-    const md = allBooksToMarkdown(books)
-    if (window.electronAPI) {
-      const savePath = await window.electronAPI.showSaveDialog('kindle-highlights.md')
-      if (!savePath) return
-      await window.electronAPI.saveFile(savePath, md)
-    } else {
-      browserDownload(md, 'kindle-highlights.md')
+    try {
+      const md = allBooksToMarkdown(books)
+      if (window.electronAPI) {
+        const savePath = await window.electronAPI.showSaveDialog('kindle-highlights.md')
+        if (!savePath) return
+        await window.electronAPI.saveFile(savePath, md)
+      } else {
+        browserDownload(md, 'kindle-highlights.md')
+      }
+    } catch (err) {
+      console.error('handleSaveAll failed:', err)
     }
   }
 
@@ -126,25 +136,41 @@ function App() {
 
   const handleCopyBook = async () => {
     if (!selectedBook) return
-    const md = bookToMarkdown(selectedBook)
-    if (window.electronAPI) {
-      await window.electronAPI.writeClipboard(md)
-    } else {
-      await navigator.clipboard.writeText(md)
+    try {
+      const lines: string[] = [`# ${selectedBook.title}\n`]
+      for (const h of filteredHighlights) {
+        lines.push(formatHighlightMd(h.text, h.date, h.metadata))
+      }
+      const md = lines.join('\n')
+      if (window.electronAPI) {
+        await window.electronAPI.writeClipboard(md)
+      } else {
+        await navigator.clipboard.writeText(md)
+      }
+    } catch (err) {
+      console.error('handleCopyBook failed:', err)
     }
   }
 
   // --- Save single book ---
 
   const handleSaveBook = async (book: Book) => {
-    const md = bookToMarkdown(book)
-    const filename = `${slugify(book.title)}.md`
-    if (window.electronAPI) {
-      const savePath = await window.electronAPI.showSaveDialog(filename)
-      if (!savePath) return
-      await window.electronAPI.saveFile(savePath, md)
-    } else {
-      browserDownload(md, filename)
+    try {
+      const lines: string[] = [`# ${book.title}\n`]
+      for (const h of filteredHighlights) {
+        lines.push(formatHighlightMd(h.text, h.date, h.metadata))
+      }
+      const md = lines.join('\n')
+      const filename = `${slugify(book.title)}.md`
+      if (window.electronAPI) {
+        const savePath = await window.electronAPI.showSaveDialog(filename)
+        if (!savePath) return
+        await window.electronAPI.saveFile(savePath, md)
+      } else {
+        browserDownload(md, filename)
+      }
+    } catch (err) {
+      console.error('handleSaveBook failed:', err)
     }
   }
 
@@ -244,7 +270,7 @@ function App() {
       <div className="status-bar">
         <span className="status-left">
           {lastImported
-            ? `Last imported: ${lastImported} · ${new Date().toISOString().slice(0, 10)}`
+            ? `Last imported: ${lastImported} · ${lastImportedAt}`
             : 'No file imported yet'}
         </span>
         <span className="status-right">

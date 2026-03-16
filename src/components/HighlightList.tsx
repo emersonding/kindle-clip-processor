@@ -20,8 +20,8 @@ export function HighlightList({ highlights }: HighlightListProps) {
 
   return (
     <div className="highlight-list">
-      {highlights.map((h, i) => (
-        <div key={i} className="highlight-card">
+      {highlights.map((h) => (
+        <div key={`${h.metadata}-${h.text.slice(0, 40)}`} className="highlight-card">
           <p className="highlight-text">{h.text}</p>
           <p className="highlight-meta">
             {h.date ? formatDate(h.date) : h.metadata}

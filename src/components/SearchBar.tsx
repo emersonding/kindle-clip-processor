@@ -35,15 +35,17 @@ export function SearchBar({
           onChange={e => onQueryChange(e.target.value)}
         />
       </div>
-      <label className="date-label">From:</label>
+      <label htmlFor="date-from" className="date-label">From:</label>
       <input
+        id="date-from"
         type="date"
         className="date-input"
         value={dateFrom}
         onChange={e => onDateFromChange(e.target.value)}
       />
-      <label className="date-label">To:</label>
+      <label htmlFor="date-to" className="date-label">To:</label>
       <input
+        id="date-to"
         type="date"
         className="date-input"
         value={dateTo}

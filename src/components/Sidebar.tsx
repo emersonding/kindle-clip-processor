@@ -41,6 +41,7 @@ export function Sidebar({
               <button
                 className="btn-icon sidebar-save-btn"
                 title="Save as .md"
+                aria-label="Save as markdown"
                 onClick={e => {
                   e.stopPropagation()
                   onSaveBook(book)

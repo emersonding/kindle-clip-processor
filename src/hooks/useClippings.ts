@@ -8,6 +8,7 @@ export interface ClippingsState {
   dateFrom: string
   dateTo: string
   lastImported: string
+  lastImportedAt: string
   kindleConnected: boolean
   kindlePath: string
 }
@@ -40,6 +41,7 @@ export function useClippings() {
     dateFrom: '',
     dateTo: '',
     lastImported: '',
+    lastImportedAt: '',
     kindleConnected: false,
     kindlePath: '',
   })
@@ -59,6 +61,7 @@ export function useClippings() {
       books,
       selectedBook: null,
       lastImported: filename,
+      lastImportedAt: new Date().toISOString().slice(0, 10),
     }))
   }, [])
 
