@@ -18,7 +18,6 @@ import (
 const (
 	chunkDelimiter   = "=========="
 	clippingLimit    = "<You have reached the clipping limit for this item>"
-	defaultExportMD  = "kindle-highlights.md"
 	envConfiguredDir = "KINDLE_CLIP_PATH"
 )
 
@@ -48,29 +47,10 @@ type Book struct {
 	Highlights []Highlight `json:"highlights"`
 }
 
-type noteView struct {
-	BookTitle  string `json:"bookTitle"`
-	Author     string `json:"author,omitempty"`
-	NoteNumber int    `json:"noteNumber"`
-	Metadata   string `json:"metadata"`
-	Text       string `json:"text"`
-	CreatedAt  string `json:"createdAt,omitempty"`
-	Kind       string `json:"kind"`
-}
-
-type bookView struct {
-	Title     string     `json:"title"`
-	Author    string     `json:"author,omitempty"`
-	NoteCount int        `json:"noteCount"`
-	FirstNote string     `json:"firstNote,omitempty"`
-	LastNote  string     `json:"lastNote,omitempty"`
-	Notes     []noteView `json:"notes,omitempty"`
-}
-
 type filters struct {
 	From   string
 	To     string
-	Title  string
+	Book   string
 	Author string
 	Query  string
 }
@@ -96,14 +76,12 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return runSet(args[1:], stdout)
 	case "list":
 		return runList(args[1:], stdout)
+	case "print":
+		return runPrint(args[1:], stdout)
 	case "all":
-		return runAll(args[1:], stdout)
+		return runPrint(args[1:], stdout)
 	case "search":
 		return runSearch(args[1:], stdout)
-	case "parse":
-		return runParse(args[1:], stdout)
-	case "export-md":
-		return runExportMD(args[1:], stdout)
 	default:
 		fmt.Fprintf(stderr, "Unknown command: %s\n\n", args[0])
 		printHelp(stderr)
@@ -120,10 +98,9 @@ Usage:
 Commands:
   set <path>                 Save the default clippings file or directory.
   list [path]                List books in Markdown by default.
-  all [path]                 Print matching notes in Markdown by default.
+  print [path]               Print matching clips in Markdown by default.
+  all [path]                 Alias for print.
   search [path] <keyword>    Search notes by keyword.
-  parse [path]               Print structured output (Markdown by default, JSON optional).
-  export-md [path]           Save filtered notes as Markdown.
   help                       Show this message.
 
 Path resolution order:
@@ -134,22 +111,26 @@ Path resolution order:
 Common options:
   --from YYYY-MM-DD    Include notes created on/after this date.
   --to YYYY-MM-DD      Include notes created on/before this date.
-  --title TEXT         Include only notes whose book title matches TEXT.
+  --book TEXT          Include only notes whose book title matches TEXT.
   --author TEXT        Include only notes whose author matches TEXT.
-  --json               Print JSON instead of Markdown.
+  --export-md PATH     Save Markdown output to a file instead of stdout.
+  --verbose            Include metadata in Markdown output.
 
 Examples:
   kindle-clip set ~/Documents/Kindle
   kindle-clip list
-  kindle-clip list ~/Documents/Kindle --author "Daniel Kahneman"
-  kindle-clip all --title "Sapiens"
-  kindle-clip search confidence
-  kindle-clip export-md --output ./highlights.md
-  cat "My Clippings.txt" | kindle-clip parse - --json
+  kindle-clip list ~/Documents/Kindle --author "Daniel Kahneman" --export-md ./books.md
+  kindle-clip print --book "Sapiens"
+  kindle-clip search confidence --verbose
+  kindle-clip print --book "Sapiens" --export-md ./sapiens-notes.md
 `)
 }
 
 func runSet(args []string, stdout io.Writer) error {
+	if isHelpArgs(args) {
+		printSetHelp(stdout)
+		return nil
+	}
 	if len(args) == 0 {
 		return errors.New("set requires a file or directory path")
 	}
@@ -166,37 +147,49 @@ func runSet(args []string, stdout io.Writer) error {
 }
 
 func runList(args []string, stdout io.Writer) error {
+	if isHelpArgs(args) {
+		printListHelp(stdout)
+		return nil
+	}
 	pathArg, fs := splitPathAndFlags(args)
-	books, asJSON, err := loadBooks(pathArg, fs)
+	books, options, err := loadBooks(pathArg, fs, "list", printListHelp, stdout)
 	if err != nil {
 		return err
 	}
-	if asJSON {
-		return writeJSON(stdout, toBookViews(books, false))
+	if books == nil {
+		return nil
 	}
-	_, err = fmt.Fprint(stdout, renderBookListMarkdown(books))
-	return err
+	return writeRenderedOutput(stdout, renderBookListMarkdown(books, options.verbose), options.output)
 }
 
-func runAll(args []string, stdout io.Writer) error {
+func runPrint(args []string, stdout io.Writer) error {
+	if isHelpArgs(args) {
+		printPrintHelp(stdout)
+		return nil
+	}
 	pathArg, fs := splitPathAndFlags(args)
-	books, asJSON, err := loadBooks(pathArg, fs)
+	books, options, err := loadBooks(pathArg, fs, "print", printPrintHelp, stdout)
 	if err != nil {
 		return err
 	}
-	if asJSON {
-		return writeJSON(stdout, flattenNotes(books))
+	if books == nil {
+		return nil
 	}
-	_, err = fmt.Fprint(stdout, renderNotesMarkdown(books))
-	return err
+	return writeRenderedOutput(stdout, renderNotesMarkdown(books, options.verbose), options.output)
 }
 
 func runSearch(args []string, stdout io.Writer) error {
+	if isHelpArgs(args) {
+		printSearchHelp(stdout)
+		return nil
+	}
 	pathArg, keyword, rest := splitSearchArgs(args)
-	fs := flag.NewFlagSet("search", flag.ContinueOnError)
-	fs.SetOutput(io.Discard)
+	fs := newCommandFlagSet("search", printSearchHelp, stdout)
 	common := bindCommonFlags(fs)
 	if err := fs.Parse(rest); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
 		return err
 	}
 	if keyword == "" {
@@ -210,48 +203,7 @@ func runSearch(args []string, stdout io.Writer) error {
 	if err != nil {
 		return err
 	}
-	if *common.jsonOut {
-		return writeJSON(stdout, flattenNotes(books))
-	}
-	_, err = fmt.Fprint(stdout, renderNotesMarkdown(books))
-	return err
-}
-
-func runParse(args []string, stdout io.Writer) error {
-	pathArg, fs := splitPathAndFlags(args)
-	books, asJSON, err := loadBooks(pathArg, fs)
-	if err != nil {
-		return err
-	}
-	if asJSON {
-		return writeJSON(stdout, toBookViews(books, true))
-	}
-	_, err = fmt.Fprint(stdout, renderStructuredMarkdown(books))
-	return err
-}
-
-func runExportMD(args []string, stdout io.Writer) error {
-	pathArg, rest := splitPathAndFlags(args)
-	fs := flag.NewFlagSet("export-md", flag.ContinueOnError)
-	fs.SetOutput(io.Discard)
-	common := bindCommonFlags(fs)
-	output := fs.String("output", defaultExportMD, "output file path")
-	if err := fs.Parse(rest); err != nil {
-		return err
-	}
-	books, err := loadBooksWithFilters(pathArg, *common.filters)
-	if err != nil {
-		return err
-	}
-	content := renderNotesMarkdown(books)
-	if err := os.MkdirAll(filepath.Dir(*output), 0o755); err != nil && filepath.Dir(*output) != "." {
-		return err
-	}
-	if err := os.WriteFile(*output, []byte(content), 0o644); err != nil {
-		return err
-	}
-	fmt.Fprintf(stdout, "# Markdown export saved\n\n- file: `%s`\n", *output)
-	return nil
+	return writeRenderedOutput(stdout, renderNotesMarkdown(books, *common.verbose), *common.output)
 }
 
 func splitPathAndFlags(args []string) (string, []string) {
@@ -289,29 +241,115 @@ func splitSearchArgs(args []string) (string, string, []string) {
 
 type commonFlags struct {
 	filters *filters
-	jsonOut *bool
+	output  *string
+	verbose *bool
 }
 
 func bindCommonFlags(fs *flag.FlagSet) commonFlags {
 	f := &filters{}
-	jsonOut := fs.Bool("json", false, "print JSON")
+	output := fs.String("export-md", "", "save Markdown output to a file")
+	verbose := fs.Bool("verbose", false, "include metadata in Markdown output")
 	fs.StringVar(&f.From, "from", "", "include notes on/after date")
 	fs.StringVar(&f.To, "to", "", "include notes on/before date")
-	fs.StringVar(&f.Title, "title", "", "include matching titles")
+	fs.StringVar(&f.Book, "book", "", "include matching titles")
 	fs.StringVar(&f.Author, "author", "", "include matching authors")
 	fs.StringVar(&f.Query, "query", "", "include matching note text")
-	return commonFlags{filters: f, jsonOut: jsonOut}
+	return commonFlags{filters: f, output: output, verbose: verbose}
 }
 
-func loadBooks(pathArg string, args []string) ([]Book, bool, error) {
-	parsed := flag.NewFlagSet("common", flag.ContinueOnError)
-	parsed.SetOutput(io.Discard)
+type loadOptions struct {
+	output  string
+	verbose bool
+}
+
+func loadBooks(pathArg string, args []string, command string, helpPrinter func(io.Writer), stdout io.Writer) ([]Book, loadOptions, error) {
+	parsed := newCommandFlagSet(command, helpPrinter, stdout)
 	common := bindCommonFlags(parsed)
 	if err := parsed.Parse(args); err != nil {
-		return nil, false, err
+		if errors.Is(err, flag.ErrHelp) {
+			return nil, loadOptions{}, nil
+		}
+		return nil, loadOptions{}, err
 	}
 	books, err := loadBooksWithFilters(pathArg, *common.filters)
-	return books, *common.jsonOut, err
+	return books, loadOptions{output: *common.output, verbose: *common.verbose}, err
+}
+
+func newCommandFlagSet(name string, helpPrinter func(io.Writer), stdout io.Writer) *flag.FlagSet {
+	fs := flag.NewFlagSet(name, flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	fs.Usage = func() {
+		helpPrinter(stdout)
+	}
+	return fs
+}
+
+func isHelpArgs(args []string) bool {
+	return len(args) == 1 && (args[0] == "--help" || args[0] == "-h")
+}
+
+func printSetHelp(w io.Writer) {
+	fmt.Fprint(w, `Usage:
+  kindle-clip set <path>
+
+Description:
+  Save the default Kindle clippings file or directory.
+`)
+}
+
+func printListHelp(w io.Writer) {
+	fmt.Fprint(w, `Usage:
+  kindle-clip list [path] [options]
+
+Description:
+  List books in Markdown by default.
+
+Options:
+  --from YYYY-MM-DD    Include notes created on/after this date.
+  --to YYYY-MM-DD      Include notes created on/before this date.
+  --book TEXT          Include only notes whose book title matches TEXT.
+  --author TEXT        Include only notes whose author matches TEXT.
+  --export-md PATH     Save Markdown output to a file instead of stdout.
+  --verbose            Include metadata in Markdown output.
+`)
+}
+
+func printPrintHelp(w io.Writer) {
+	fmt.Fprint(w, `Usage:
+  kindle-clip print [path] [options]
+  kindle-clip all [path] [options]
+
+Description:
+  Print matching clips in Markdown by default.
+
+Options:
+  --from YYYY-MM-DD    Include notes created on/after this date.
+  --to YYYY-MM-DD      Include notes created on/before this date.
+  --book TEXT          Include only notes whose book title matches TEXT.
+  --author TEXT        Include only notes whose author matches TEXT.
+  --export-md PATH     Save Markdown output to a file instead of stdout.
+  --verbose            Include metadata in Markdown output.
+`)
+}
+
+func printSearchHelp(w io.Writer) {
+	fmt.Fprint(w, `Usage:
+  kindle-clip search [path] <keyword> [options]
+  kindle-clip search [path] --query <keyword> [options]
+
+Description:
+  Search notes by keyword.
+  Prefer the positional <keyword>; --query is also accepted for consistency with other filters.
+
+Options:
+  --from YYYY-MM-DD    Include notes created on/after this date.
+  --to YYYY-MM-DD      Include notes created on/before this date.
+  --book TEXT          Include only notes whose book title matches TEXT.
+  --author TEXT        Include only notes whose author matches TEXT.
+  --query TEXT         Include matching note text.
+  --export-md PATH     Save Markdown output to a file instead of stdout.
+  --verbose            Include metadata in Markdown output.
+`)
 }
 
 func loadBooksWithFilters(pathArg string, f filters) ([]Book, error) {
@@ -475,7 +513,7 @@ func parseAuthor(title string) string {
 func filterBooks(books []Book, f filters) []Book {
 	filtered := make([]Book, 0, len(books))
 	for _, book := range books {
-		if f.Title != "" && !strings.Contains(strings.ToLower(book.Title), strings.ToLower(f.Title)) {
+		if f.Book != "" && !strings.Contains(strings.ToLower(book.Title), strings.ToLower(f.Book)) {
 			continue
 		}
 		if f.Author != "" && !strings.Contains(strings.ToLower(book.Author), strings.ToLower(f.Author)) {
@@ -539,85 +577,67 @@ func matchesFilters(book Book, highlight Highlight, f filters) bool {
 	return true
 }
 
-func flattenNotes(books []Book) []noteView {
-	notes := []noteView{}
-	for _, book := range books {
-		for index, highlight := range book.Highlights {
-			notes = append(notes, noteView{BookTitle: book.Title, Author: book.Author, NoteNumber: index + 1, Metadata: highlight.Metadata, Text: highlight.Text, CreatedAt: formatDateTime(highlight.Date), Kind: highlight.Kind})
-		}
-	}
-	return notes
-}
-
-func toBookViews(books []Book, includeNotes bool) []bookView {
-	views := make([]bookView, 0, len(books))
-	for _, book := range books {
-		view := bookView{Title: book.Title, Author: book.Author, NoteCount: book.NoteCount, FirstNote: formatDateTime(book.FirstNote), LastNote: formatDateTime(book.LastNote)}
-		if includeNotes {
-			view.Notes = flattenNotes([]Book{book})
-		}
-		views = append(views, view)
-	}
-	return views
-}
-
-func renderBookListMarkdown(books []Book) string {
+func renderBookListMarkdown(books []Book, verbose bool) string {
 	if len(books) == 0 {
 		return "# Books\n\n_No books matched your filters._\n"
 	}
 	var b strings.Builder
 	b.WriteString("# Books\n\n")
 	for _, book := range books {
-		fmt.Fprintf(&b, "- **%s**", book.Title)
-		if book.Author != "" {
-			fmt.Fprintf(&b, " — %s", book.Author)
+		fmt.Fprintf(&b, "- **%s**\n", book.Title)
+		if verbose {
+			fmt.Fprintf(&b, "  - clips: %d\n", book.NoteCount)
+			fmt.Fprintf(&b, "  - first: %s\n", valueOrUnknown(formatDateTime(book.FirstNote)))
+			fmt.Fprintf(&b, "  - last: %s\n", valueOrUnknown(formatDateTime(book.LastNote)))
 		}
-		fmt.Fprintf(&b, "\n  - notes: %d\n  - first: %s\n  - last: %s\n", book.NoteCount, formatDateTime(book.FirstNote), formatDateTime(book.LastNote))
 	}
 	return b.String()
 }
 
-func renderNotesMarkdown(books []Book) string {
+func renderNotesMarkdown(books []Book, verbose bool) string {
 	if len(books) == 0 {
-		return "# Notes\n\n_No notes matched your filters._\n"
+		return "_No notes matched your filters._\n"
 	}
 	var b strings.Builder
-	b.WriteString("# Notes\n\n")
-	for _, note := range flattenNotes(books) {
-		fmt.Fprintf(&b, "## %s\n\n", note.BookTitle)
-		if note.Author != "" {
-			fmt.Fprintf(&b, "- author: %s\n", note.Author)
-		}
-		fmt.Fprintf(&b, "- note: %d\n- kind: %s\n- created: %s\n- metadata: %s\n\n", note.NoteNumber, valueOrUnknown(note.Kind), valueOrUnknown(note.CreatedAt), note.Metadata)
-		for _, line := range strings.Split(note.Text, "\n") {
-			fmt.Fprintf(&b, "> %s\n", line)
-		}
-		b.WriteString("\n")
-	}
-	return b.String()
-}
-
-func renderStructuredMarkdown(books []Book) string {
-	if len(books) == 0 {
-		return "# Parsed Clippings\n\n_No notes matched your filters._\n"
-	}
-	var b strings.Builder
-	b.WriteString("# Parsed Clippings\n\n")
-	for _, book := range books {
-		fmt.Fprintf(&b, "## %s\n\n", book.Title)
-		if book.Author != "" {
-			fmt.Fprintf(&b, "- author: %s\n", book.Author)
-		}
-		fmt.Fprintf(&b, "- notes: %d\n- first: %s\n- last: %s\n\n", book.NoteCount, formatDateTime(book.FirstNote), formatDateTime(book.LastNote))
-		for _, note := range flattenNotes([]Book{book}) {
-			fmt.Fprintf(&b, "### Note %d\n\n- kind: %s\n- created: %s\n- metadata: %s\n\n", note.NoteNumber, valueOrUnknown(note.Kind), valueOrUnknown(note.CreatedAt), note.Metadata)
-			for _, line := range strings.Split(note.Text, "\n") {
-				fmt.Fprintf(&b, "> %s\n", line)
-			}
+	for index, book := range books {
+		if index > 0 {
 			b.WriteString("\n")
 		}
+		fmt.Fprintf(&b, "# %s\n\n", book.Title)
+		for noteIndex, note := range book.Highlights {
+			for _, line := range formatClipLines(note) {
+				fmt.Fprintf(&b, "%s\n", line)
+			}
+			if verbose {
+				fmt.Fprintf(&b, "> *%s*\n", note.Metadata)
+			}
+			if noteIndex < len(book.Highlights)-1 {
+				b.WriteString("\n")
+			}
+		}
 	}
 	return b.String()
+}
+
+func formatClipLines(clip Highlight) []string {
+	lines := strings.Split(clip.Text, "\n")
+	if clip.Kind != "note" {
+		formatted := make([]string, 0, len(lines))
+		for _, line := range lines {
+			formatted = append(formatted, fmt.Sprintf("> %s", line))
+		}
+		return formatted
+	}
+
+	formatted := make([]string, 0, len(lines))
+	for index, line := range lines {
+		if index == 0 {
+			formatted = append(formatted, fmt.Sprintf("> **Note**: %s", line))
+			continue
+		}
+		formatted = append(formatted, fmt.Sprintf("> %s", line))
+	}
+	return formatted
 }
 
 func valueOrUnknown(value string) string {
@@ -634,10 +654,19 @@ func formatDateTime(value *time.Time) string {
 	return value.Format(time.RFC3339)
 }
 
-func writeJSON(w io.Writer, value any) error {
-	encoder := json.NewEncoder(w)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(value)
+func writeRenderedOutput(stdout io.Writer, content string, outputPath string) error {
+	if outputPath == "" {
+		_, err := fmt.Fprint(stdout, content)
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil && filepath.Dir(outputPath) != "." {
+		return err
+	}
+	if err := os.WriteFile(outputPath, []byte(content), 0o644); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintf(stdout, "# Output saved\n\n- file: `%s`\n", outputPath)
+	return err
 }
 
 func readInput(pathArg string) (string, error) {
