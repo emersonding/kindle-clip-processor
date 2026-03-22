@@ -21,8 +21,9 @@ export function formatDate(date: Date | null): string {
  */
 export function formatHighlight(h: Highlight): string {
   const textLines = h.text.split('\n').map(line => `> ${line}`).join('\n')
-  const dateLine = h.date ? `> *${formatDate(h.date)}*` : `> *${h.metadata}*`
-  return `${textLines}\n${dateLine}\n`
+  const kindLabel = h.kind === 'unknown' ? 'clip' : h.kind
+  const dateLabel = h.date ? formatDate(h.date) : h.metadata
+  return `${textLines}\n> *${kindLabel} · ${dateLabel}*\n`
 }
 
 /**

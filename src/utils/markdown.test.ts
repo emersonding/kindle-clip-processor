@@ -22,9 +22,10 @@ describe('formatHighlight', () => {
       metadata: '- 您在第45页的标注 | 添加于 2016年3月1日星期二 下午2:30:00',
       text: '生命的本质就是孤独。',
       date: new Date(2016, 2, 1, 14, 30),
+      kind: 'highlight',
     }
     const result = formatHighlight(h)
-    assert.equal(result, '> 生命的本质就是孤独。\n> *2016-03-01 14:30*\n')
+    assert.equal(result, '> 生命的本质就是孤独。\n> *highlight · 2016-03-01 14:30*\n')
   })
 
   test('falls back to metadata string when date is null', () => {
@@ -33,9 +34,10 @@ describe('formatHighlight', () => {
       metadata: '- raw metadata line',
       text: 'Some highlight text.',
       date: null,
+      kind: 'note',
     }
     const result = formatHighlight(h)
-    assert.equal(result, '> Some highlight text.\n> *- raw metadata line*\n')
+    assert.equal(result, '> Some highlight text.\n> *note · - raw metadata line*\n')
   })
 
   test('prefixes every line of multiline text with >', () => {
@@ -44,9 +46,10 @@ describe('formatHighlight', () => {
       metadata: 'meta',
       text: 'First line.\nSecond line.',
       date: new Date(2020, 0, 1, 9, 0),
+      kind: 'highlight',
     }
     const result = formatHighlight(h)
-    assert.equal(result, '> First line.\n> Second line.\n> *2020-01-01 09:00*\n')
+    assert.equal(result, '> First line.\n> Second line.\n> *highlight · 2020-01-01 09:00*\n')
   })
 })
 
@@ -60,12 +63,14 @@ describe('formatBook', () => {
           metadata: 'meta1',
           text: 'First highlight.',
           date: new Date(2020, 0, 1, 9, 0),
+          kind: 'highlight',
         },
         {
           title: 'My Book',
           metadata: 'meta2',
           text: 'Second highlight.',
           date: new Date(2020, 0, 2, 10, 30),
+          kind: 'note',
         },
       ],
     }
@@ -73,9 +78,9 @@ describe('formatBook', () => {
     const expected =
       '# My Book\n' +
       '\n' +
-      '> First highlight.\n> *2020-01-01 09:00*\n' +
+      '> First highlight.\n> *highlight · 2020-01-01 09:00*\n' +
       '\n' +
-      '> Second highlight.\n> *2020-01-02 10:30*\n'
+      '> Second highlight.\n> *note · 2020-01-02 10:30*\n'
     assert.equal(result, expected)
   })
 
@@ -97,10 +102,11 @@ describe('formatBookFromHighlights', () => {
         metadata: 'meta1',
         text: 'First highlight.',
         date: new Date(2020, 0, 1, 9, 0),
+        kind: 'highlight',
       },
     ]
     const result = formatBookFromHighlights('My Book', highlights)
-    assert.equal(result, '# My Book\n\n> First highlight.\n> *2020-01-01 09:00*\n')
+    assert.equal(result, '# My Book\n\n> First highlight.\n> *highlight · 2020-01-01 09:00*\n')
   })
 })
 
@@ -119,6 +125,7 @@ describe('formatAll', () => {
             metadata: 'meta',
             text: 'Highlight one.',
             date: new Date(2021, 0, 1, 8, 0),
+            kind: 'highlight',
           },
         ],
       },
@@ -130,15 +137,16 @@ describe('formatAll', () => {
             metadata: 'meta',
             text: 'Highlight two.',
             date: new Date(2021, 5, 15, 12, 0),
+            kind: 'note',
           },
         ],
       },
     ]
     const result = formatAll(books)
     const expected =
-      '# Book One\n\n> Highlight one.\n> *2021-01-01 08:00*\n' +
+      '# Book One\n\n> Highlight one.\n> *highlight · 2021-01-01 08:00*\n' +
       '\n---\n\n' +
-      '# Book Two\n\n> Highlight two.\n> *2021-06-15 12:00*\n'
+      '# Book Two\n\n> Highlight two.\n> *note · 2021-06-15 12:00*\n'
     assert.equal(result, expected)
   })
 
@@ -152,6 +160,7 @@ describe('formatAll', () => {
             metadata: 'meta',
             text: 'Highlight one.',
             date: new Date(2021, 0, 1, 8, 0),
+            kind: 'highlight',
           },
         ],
       },
@@ -163,6 +172,7 @@ describe('formatAll', () => {
             metadata: 'meta',
             text: 'Highlight two.',
             date: new Date(2021, 5, 15, 12, 0),
+            kind: 'highlight',
           },
         ],
       },

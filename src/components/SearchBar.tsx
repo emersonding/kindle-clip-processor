@@ -30,7 +30,7 @@ export function SearchBar({
         <input
           type="text"
           className="search-input"
-          placeholder="Search highlights..."
+          placeholder="Search clips..."
           value={query}
           onChange={e => onQueryChange(e.target.value)}
         />

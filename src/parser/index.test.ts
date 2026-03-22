@@ -229,6 +229,34 @@ ${DELIMITER}`;
     );
   });
 
+  test('classifies English note entries separately from highlights', () => {
+    const input = `The Pragmatic Programmer (David Thomas; Andrew Hunt)
+- Your Note on page 14 | location 199 | Added on Wednesday, 15 January 2025 22:18:02
+
+The broken windows theory — applies to codebases too
+${DELIMITER}`;
+
+    const result = parseClippings(input);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].highlights.length, 1);
+    assert.equal(result[0].highlights[0].kind, 'note');
+    assert.equal(result[0].highlights[0].text, 'The broken windows theory — applies to codebases too');
+  });
+
+  test('classifies Chinese note entries separately from highlights', () => {
+    const input = `舞!舞!舞!
+- 您在位置 #300 的笔记 | 添加于 2015年9月24日星期四 上午6:00:00
+
+这是我自己的评论。
+${DELIMITER}`;
+
+    const result = parseClippings(input);
+    assert.equal(result.length, 1);
+    assert.equal(result[0].highlights.length, 1);
+    assert.equal(result[0].highlights[0].kind, 'note');
+    assert.equal(result[0].highlights[0].text, '这是我自己的评论。');
+  });
+
   test('multi-line highlight body is joined with newline', () => {
     const input = `挪威的森林
 - 您在第50页的标注 | 添加于 2016年3月2日星期三 上午9:00:00

@@ -11,7 +11,7 @@ export function BookDetail({ book, highlightCount, onCopy, onSave }: BookDetailP
   if (!book) {
     return (
       <div className="book-detail book-detail--empty">
-        <p className="book-detail-placeholder">Select a book to view highlights</p>
+        <p className="book-detail-placeholder">Select a book to view clips</p>
       </div>
     )
   }
@@ -21,7 +21,7 @@ export function BookDetail({ book, highlightCount, onCopy, onSave }: BookDetailP
       <div className="book-detail-info">
         <h2 className="book-detail-title">{book.title}</h2>
         <p className="book-detail-subtitle">
-          {highlightCount} {highlightCount === 1 ? 'highlight' : 'highlights'}
+          {highlightCount} {highlightCount === 1 ? 'clip' : 'clips'}
         </p>
       </div>
       <div className="book-detail-actions">

@@ -7,7 +7,7 @@ interface HighlightListProps {
 
 export function HighlightList({ highlights }: HighlightListProps) {
   if (highlights.length === 0) {
-    return <div className="highlight-list-empty">No highlights to show.</div>
+    return <div className="highlight-list-empty">No clips to show.</div>
   }
 
   return (
@@ -16,6 +16,8 @@ export function HighlightList({ highlights }: HighlightListProps) {
         <div key={`${h.metadata}-${h.text.slice(0, 40)}`} className="highlight-card">
           <p className="highlight-text">{h.text}</p>
           <p className="highlight-meta">
+            <strong>{h.kind === 'unknown' ? 'clip' : h.kind}</strong>
+            {' · '}
             {h.date ? formatDate(h.date) : h.metadata}
           </p>
         </div>
