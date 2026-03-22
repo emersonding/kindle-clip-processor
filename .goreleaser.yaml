@@ -22,14 +22,5 @@ archives:
     format_overrides:
       - goos: windows
         formats: [zip]
-brews:
-  - name: kindle-clip
-    repository:
-      owner: CHANGE_ME
-      name: homebrew-tap
-    homepage: "https://github.com/CHANGE_ME/kindle-clip-processor"
-    description: "CLI for parsing, searching, and exporting Kindle clippings"
-    install: |
-      bin.install "kindle-clip"
 release:
   draft: true
