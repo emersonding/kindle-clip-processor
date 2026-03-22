@@ -1,0 +1,35 @@
+version: 2
+project_name: kindle-clip
+builds:
+  - id: kindle-clip
+    main: ./cmd/kindle-clip
+    binary: kindle-clip
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - id: default
+    builds:
+      - kindle-clip
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+brews:
+  - name: kindle-clip
+    repository:
+      owner: CHANGE_ME
+      name: homebrew-tap
+    homepage: "https://github.com/CHANGE_ME/kindle-clip-processor"
+    description: "CLI for parsing, searching, and exporting Kindle clippings"
+    install: |
+      bin.install "kindle-clip"
+release:
+  draft: true
