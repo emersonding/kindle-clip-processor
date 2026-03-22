@@ -5,7 +5,7 @@ interface SidebarProps {
   selectedBook: Book | null
   onSelectBook: (book: Book) => void
   onSaveBook: (book: Book) => void
-  totalHighlightCount: number
+  totalClipCount: number
 }
 
 export function Sidebar({
@@ -13,7 +13,7 @@ export function Sidebar({
   selectedBook,
   onSelectBook,
   onSaveBook,
-  totalHighlightCount,
+  totalClipCount,
 }: SidebarProps) {
   const bookCount = books.length
 
@@ -24,7 +24,7 @@ export function Sidebar({
           {bookCount} {bookCount === 1 ? 'Book' : 'Books'}
         </span>
         <span className="sidebar-count-sep"> · </span>
-        <span className="sidebar-count">{totalHighlightCount} highlights</span>
+        <span className="sidebar-count">{totalClipCount} clips</span>
       </div>
       <div className="sidebar-list">
         {books.map(book => {

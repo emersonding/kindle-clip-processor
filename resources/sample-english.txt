@@ -1,64 +1,120 @@
 Thinking, Fast and Slow (Daniel Kahneman)
 - Your Highlight on page 20 | location 291-293 | Added on Sunday, 5 January 2025 09:14:22
 
-The confidence people have in their beliefs is not a measure of the quality of evidence but of the coherence of the story the mind has managed to construct.
+The confidence people have in their beliefs is not a measure of the quality of evidence.
+
+==========
+Thinking, Fast and Slow (Daniel Kahneman)
+- Your Note on page 21 | location 294 | Added on Sunday, 5 January 2025 09:15:10
+
+This feels like a warning against overconfident summaries.
 
 ==========
 Thinking, Fast and Slow (Daniel Kahneman)
 - Your Highlight on page 45 | location 681-683 | Added on Sunday, 5 January 2025 09:41:07
 
-Nothing in life is as important as you think it is, while you are thinking about it.
-
-==========
-Thinking, Fast and Slow (Daniel Kahneman)
-- Your Bookmark at location 702 | Added on Sunday, 5 January 2025 09:43:55
+Nothing in life is as important as you think it is while you are thinking about it.
 
 ==========
 Thinking, Fast and Slow (Daniel Kahneman)
 - Your Highlight on page 48 | location 724-726 | Added on Sunday, 5 January 2025 09:48:30
 
-The premise of this book is that it is easier to recognize other people's mistakes than our own.
+It is easier to recognize other people's mistakes than our own.
+
+==========
+Thinking, Fast and Slow (Daniel Kahneman)
+- Your Note on page 52 | location 780 | Added on Sunday, 5 January 2025 09:58:44
+
+The planning fallacy shows up in product work every week.
 
 ==========
 The Pragmatic Programmer (David Thomas; Andrew Hunt)
 - Your Highlight on page 2 | location 38-40 | Added on Wednesday, 15 January 2025 22:03:11
 
-You shouldn't be wedded to any particular technology, but have a broad enough background and experience base to allow you to choose good solutions in particular situations.
+You should not be wedded to any particular technology.
 
 ==========
 The Pragmatic Programmer (David Thomas; Andrew Hunt)
 - Your Highlight on page 14 | location 198-200 | Added on Wednesday, 15 January 2025 22:17:44
 
-Don't leave "broken windows" (bad designs, wrong decisions, or poor code) unrepaired. Fix each one as soon as it is discovered.
+Don't leave broken windows unrepaired.
 
 ==========
 The Pragmatic Programmer (David Thomas; Andrew Hunt)
 - Your Note on page 14 | location 199 | Added on Wednesday, 15 January 2025 22:18:02
 
-The broken windows theory — applies to codebases too
+The broken windows theory applies to codebases too.
 
 ==========
 The Pragmatic Programmer (David Thomas; Andrew Hunt)
 - Your Highlight on page 37 | location 533-535 | Added on Thursday, 16 January 2025 07:22:18
 
-It's not until you try to use the code in a program that you realize it is incomplete or flawed. This will happen less often if you write tests first.
+You realize code is incomplete only when you try to use it.
+
+==========
+The Pragmatic Programmer (David Thomas; Andrew Hunt)
+- Your Note on page 53 | location 761 | Added on Thursday, 16 January 2025 07:55:41
+
+Tests-first is the part I want the toolchain to encourage.
 
 ==========
 Sapiens: A Brief History of Humankind (Yuval Noah Harari)
 - Your Highlight on page 3 | location 40-42 | Added on Friday, 7 February 2025 18:30:55
 
-History is something that very few people have been doing while everyone else was ploughing fields and carrying water buckets.
+History is something that very few people have been doing.
+
+==========
+Sapiens: A Brief History of Humankind (Yuval Noah Harari)
+- Your Note on page 4 | location 43 | Added on Friday, 7 February 2025 18:32:12
+
+The framing is provocative but memorable.
 
 ==========
 Sapiens: A Brief History of Humankind (Yuval Noah Harari)
 - Your Highlight on page 31 | location 464-467 | Added on Friday, 7 February 2025 19:05:33
 
-Large numbers of strangers can cooperate successfully by believing in common myths. Any large-scale human cooperation — whether a modern state, a medieval church, an ancient city or an archaic tribe — is rooted in common myths that exist only in people's collective imagination.
+Large numbers of strangers can cooperate successfully by believing in common myths.
 
 ==========
 Sapiens: A Brief History of Humankind (Yuval Noah Harari)
 - Your Highlight on page 89 | location 1340-1342 | Added on Saturday, 8 February 2025 10:14:09
 
-<You have reached the clipping limit for this item>
+An imagined order is never embedded in the material world.
+
+==========
+Sapiens: A Brief History of Humankind (Yuval Noah Harari)
+- Your Note on page 90 | location 1343 | Added on Saturday, 8 February 2025 10:15:44
+
+Useful reminder that institutions persist through shared stories.
+
+==========
+Atomic Habits (James Clear)
+- Your Highlight on page 12 | location 176-178 | Added on Monday, March 3, 2025 2:30:00 PM
+
+You do not rise to the level of your goals. You fall to the level of your systems.
+
+==========
+Atomic Habits (James Clear)
+- Your Note on page 13 | location 182 | Added on Monday, March 3, 2025 2:34:12 PM
+
+This is the cleanest argument for designing routines.
+
+==========
+Atomic Habits (James Clear)
+- Your Highlight on page 27 | location 401-403 | Added on Tuesday, March 4, 2025 8:05:31 AM
+
+Every action you take is a vote for the type of person you wish to become.
+
+==========
+Atomic Habits (James Clear)
+- Your Highlight on page 44 | location 655-657 | Added on Tuesday, March 4, 2025 8:22:48 AM
+
+Environment often matters more than motivation.
+
+==========
+Atomic Habits (James Clear)
+- Your Note on page 45 | location 660 | Added on Tuesday, March 4, 2025 8:24:05 AM
+
+This belongs in any discussion about reducing friction.
 
 ==========

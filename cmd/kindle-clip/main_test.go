@@ -43,6 +43,37 @@ func TestRenderMarkdown(t *testing.T) {
 	}
 }
 
+func TestParseClippingsClassifiesHighlightAndNoteKinds(t *testing.T) {
+	content := strings.Join([]string{
+		"The Pragmatic Programmer (David Thomas; Andrew Hunt)",
+		"- Your Highlight on page 14 | location 198-200 | Added on Wednesday, 15 January 2025 22:17:44",
+		"",
+		"Don't leave broken windows unrepaired.",
+		"",
+		"==========",
+		"The Pragmatic Programmer (David Thomas; Andrew Hunt)",
+		"- Your Note on page 14 | location 199 | Added on Wednesday, 15 January 2025 22:18:02",
+		"",
+		"Comment about the broken windows theory.",
+		"",
+		"==========",
+	}, "\n")
+
+	books := parseClippings(content)
+	if len(books) != 1 {
+		t.Fatalf("expected 1 book, got %d", len(books))
+	}
+	if len(books[0].Highlights) != 2 {
+		t.Fatalf("expected 2 clips, got %d", len(books[0].Highlights))
+	}
+	if books[0].Highlights[0].Kind != "highlight" {
+		t.Fatalf("expected first clip kind highlight, got %q", books[0].Highlights[0].Kind)
+	}
+	if books[0].Highlights[1].Kind != "note" {
+		t.Fatalf("expected second clip kind note, got %q", books[0].Highlights[1].Kind)
+	}
+}
+
 func TestResolveConfiguredPath(t *testing.T) {
 	temp := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", temp)

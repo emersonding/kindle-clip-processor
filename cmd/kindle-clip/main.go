@@ -36,6 +36,7 @@ type Highlight struct {
 	Metadata string     `json:"metadata"`
 	Text     string     `json:"text"`
 	Date     *time.Time `json:"date,omitempty"`
+	Kind     string     `json:"kind"`
 }
 
 type Book struct {
@@ -54,6 +55,7 @@ type noteView struct {
 	Metadata   string `json:"metadata"`
 	Text       string `json:"text"`
 	CreatedAt  string `json:"createdAt,omitempty"`
+	Kind       string `json:"kind"`
 }
 
 type bookView struct {
@@ -352,10 +354,11 @@ func parseClippings(content string) []Book {
 		if len(lines) >= 3 {
 			text = strings.Join(lines[2:], "\n")
 		}
+		kind := detectClipKind(metadata)
 		if text == "" || text == clippingLimit {
 			continue
 		}
-		highlight := Highlight{Title: title, Metadata: metadata, Text: text, Date: extractDate(metadata)}
+		highlight := Highlight{Title: title, Metadata: metadata, Text: text, Date: extractDate(metadata), Kind: kind}
 		book := booksMap[title]
 		if book == nil {
 			book = &Book{Title: title, Author: parseAuthor(title)}
@@ -436,6 +439,19 @@ func extractDate(metadata string) *time.Time {
 		return &t
 	}
 	return nil
+}
+
+func detectClipKind(metadata string) string {
+	switch {
+	case strings.Contains(metadata, "Your Note"), strings.Contains(metadata, "您的笔记"), strings.Contains(metadata, "笔记"):
+		return "note"
+	case strings.Contains(metadata, "Your Highlight"), strings.Contains(metadata, "标注"):
+		return "highlight"
+	case strings.Contains(metadata, "Your Bookmark"), strings.Contains(metadata, "书签"):
+		return "bookmark"
+	default:
+		return "unknown"
+	}
 }
 
 func mustInts(values []string) []int {
@@ -527,7 +543,7 @@ func flattenNotes(books []Book) []noteView {
 	notes := []noteView{}
 	for _, book := range books {
 		for index, highlight := range book.Highlights {
-			notes = append(notes, noteView{BookTitle: book.Title, Author: book.Author, NoteNumber: index + 1, Metadata: highlight.Metadata, Text: highlight.Text, CreatedAt: formatDateTime(highlight.Date)})
+			notes = append(notes, noteView{BookTitle: book.Title, Author: book.Author, NoteNumber: index + 1, Metadata: highlight.Metadata, Text: highlight.Text, CreatedAt: formatDateTime(highlight.Date), Kind: highlight.Kind})
 		}
 	}
 	return notes
@@ -572,7 +588,7 @@ func renderNotesMarkdown(books []Book) string {
 		if note.Author != "" {
 			fmt.Fprintf(&b, "- author: %s\n", note.Author)
 		}
-		fmt.Fprintf(&b, "- note: %d\n- created: %s\n- metadata: %s\n\n", note.NoteNumber, valueOrUnknown(note.CreatedAt), note.Metadata)
+		fmt.Fprintf(&b, "- note: %d\n- kind: %s\n- created: %s\n- metadata: %s\n\n", note.NoteNumber, valueOrUnknown(note.Kind), valueOrUnknown(note.CreatedAt), note.Metadata)
 		for _, line := range strings.Split(note.Text, "\n") {
 			fmt.Fprintf(&b, "> %s\n", line)
 		}
@@ -594,7 +610,7 @@ func renderStructuredMarkdown(books []Book) string {
 		}
 		fmt.Fprintf(&b, "- notes: %d\n- first: %s\n- last: %s\n\n", book.NoteCount, formatDateTime(book.FirstNote), formatDateTime(book.LastNote))
 		for _, note := range flattenNotes([]Book{book}) {
-			fmt.Fprintf(&b, "### Note %d\n\n- created: %s\n- metadata: %s\n\n", note.NoteNumber, valueOrUnknown(note.CreatedAt), note.Metadata)
+			fmt.Fprintf(&b, "### Note %d\n\n- kind: %s\n- created: %s\n- metadata: %s\n\n", note.NoteNumber, valueOrUnknown(note.Kind), valueOrUnknown(note.CreatedAt), note.Metadata)
 			for _, line := range strings.Split(note.Text, "\n") {
 				fmt.Fprintf(&b, "> %s\n", line)
 			}

@@ -45,8 +45,7 @@ function App() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Total highlights in filtered view
-  const totalHighlights = filteredBooks.reduce((acc, b) => acc + b.highlights.length, 0)
+  const totalClips = filteredBooks.reduce((acc, b) => acc + b.highlights.length, 0)
 
   // --- Import ---
 
@@ -201,7 +200,7 @@ function App() {
           selectedBook={selectedBook}
           onSelectBook={handleSelectBook}
           onSaveBook={handleSaveBook}
-          totalHighlightCount={totalHighlights}
+          totalClipCount={totalClips}
         />
 
         <div className="content-pane">

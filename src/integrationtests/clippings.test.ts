@@ -38,8 +38,8 @@ describe('English sample (sample-english.txt)', () => {
   const content = loadSample('sample-english.txt');
   const books = parseClippings(content);
 
-  test('parses 3 books', () => {
-    assert.equal(books.length, 3);
+  test('parses 4 books', () => {
+    assert.equal(books.length, 4);
   });
 
   test('book titles are correct', () => {
@@ -47,21 +47,34 @@ describe('English sample (sample-english.txt)', () => {
     assert.ok(titles.some(t => t.includes('Thinking, Fast and Slow')));
     assert.ok(titles.some(t => t.includes('Pragmatic Programmer')));
     assert.ok(titles.some(t => t.includes('Sapiens')));
+    assert.ok(titles.some(t => t.includes('Atomic Habits')));
   });
 
-  test('Thinking, Fast and Slow has 3 highlights (bookmark and clipping limit skipped)', () => {
+  test('contains 20 parsed clips with mixed highlight and note kinds', () => {
+    const clips = books.flatMap(book => book.highlights);
+    assert.equal(clips.length, 20);
+    assert.equal(clips.filter(clip => clip.kind === 'highlight').length, 12);
+    assert.equal(clips.filter(clip => clip.kind === 'note').length, 8);
+  });
+
+  test('Thinking, Fast and Slow has 5 clips', () => {
     const book = books.find(b => b.title.includes('Thinking, Fast and Slow'))!;
-    assert.equal(book.highlights.length, 3);
+    assert.equal(book.highlights.length, 5);
   });
 
-  test('The Pragmatic Programmer has 4 entries (3 highlights + 1 note)', () => {
+  test('The Pragmatic Programmer has 5 entries', () => {
     const book = books.find(b => b.title.includes('Pragmatic Programmer'))!;
-    assert.equal(book.highlights.length, 4);
+    assert.equal(book.highlights.length, 5);
   });
 
-  test('Sapiens has 2 highlights (clipping limit entry skipped)', () => {
+  test('Sapiens has 5 clips', () => {
     const book = books.find(b => b.title.includes('Sapiens'))!;
-    assert.equal(book.highlights.length, 2);
+    assert.equal(book.highlights.length, 5);
+  });
+
+  test('Atomic Habits has 5 clips using US date format', () => {
+    const book = books.find(b => b.title.includes('Atomic Habits'))!;
+    assert.equal(book.highlights.length, 5);
   });
 
   test('all highlights have non-null dates (English date parsing works)', () => {
@@ -82,14 +95,14 @@ describe('English sample (sample-english.txt)', () => {
 
   // ---- Date filtering ----
 
-  test('date filter: Feb 2025 returns only Sapiens highlights', () => {
+  test('date filter: Feb 2025 returns only Sapiens clips', () => {
     const filtered = books
       .map(b => ({ ...b, highlights: b.highlights.filter(h => matchesFilters(h, '', '2025-02-01', '2025-02-28')) }))
       .filter(b => b.highlights.length > 0);
 
     assert.equal(filtered.length, 1);
     assert.ok(filtered[0].title.includes('Sapiens'));
-    assert.equal(filtered[0].highlights.length, 2);
+    assert.equal(filtered[0].highlights.length, 5);
   });
 
   test('date filter: Jan 2025 excludes Sapiens', () => {
@@ -101,13 +114,14 @@ describe('English sample (sample-english.txt)', () => {
   });
 
   test('date filter: narrow range returns subset', () => {
-    // Pragmatic Programmer highlights span Jan 15-16; Thinking Fast and Slow is Jan 5
+    // Pragmatic Programmer clips span Jan 15-16; Thinking is Jan 5, Sapiens is Feb, Atomic Habits is Mar.
     const filtered = books
       .map(b => ({ ...b, highlights: b.highlights.filter(h => matchesFilters(h, '', '2025-01-15', '2025-01-16')) }))
       .filter(b => b.highlights.length > 0);
 
     assert.equal(filtered.length, 1);
     assert.ok(filtered[0].title.includes('Pragmatic Programmer'));
+    assert.equal(filtered[0].highlights.length, 5);
   });
 
   // ---- Keyword filtering ----
@@ -148,6 +162,7 @@ describe('English sample (sample-english.txt)', () => {
     assert.ok(md.includes('Thinking, Fast and Slow'));
     assert.ok(md.includes('Pragmatic Programmer'));
     assert.ok(md.includes('Sapiens'));
+    assert.ok(md.includes('Atomic Habits'));
   });
 
   test('formatAll contains blockquote-formatted highlights', () => {
@@ -171,6 +186,13 @@ describe('Chinese sample (sample-chinese.txt)', () => {
 
   test('parses 2 books', () => {
     assert.equal(books.length, 2);
+  });
+
+  test('contains 20 parsed clips with mixed highlight and note kinds', () => {
+    const clips = books.flatMap(book => book.highlights);
+    assert.equal(clips.length, 20);
+    assert.equal(clips.filter(clip => clip.kind === 'highlight').length, 11);
+    assert.equal(clips.filter(clip => clip.kind === 'note').length, 9);
   });
 
   test('email is stripped from titles', () => {

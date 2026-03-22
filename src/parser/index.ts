@@ -1,8 +1,11 @@
+export type ClipKind = 'highlight' | 'note' | 'bookmark' | 'unknown'
+
 export interface Highlight {
   title: string;      // cleaned book title (email stripped)
   metadata: string;   // raw metadata line (location/page info)
   text: string;       // highlight text (always non-empty — chunks with empty text are skipped during parsing)
   date: Date | null;  // parsed from Chinese or English date format
+  kind: ClipKind;
 }
 
 export interface Book {
@@ -13,6 +16,9 @@ export interface Book {
 const CHUNK_DELIMITER = '==========';
 const CLIPPING_LIMIT_TEXT = '<You have reached the clipping limit for this item>';
 const EMAIL_REGEX = /\([^)]*@[^)]*\)/g;
+const NOTE_MARKERS = ['Your Note', '您的笔记', '笔记'];
+const HIGHLIGHT_MARKERS = ['Your Highlight', '标注'];
+const BOOKMARK_MARKERS = ['Your Bookmark', '书签'];
 
 // Chinese format: 2016年3月1日星期二 下午3:30:00
 const ZH_DATE_REGEX = /(\d+)年(\d+)月(\d+)日.*?(\d+):(\d+):(\d+)/;
@@ -79,6 +85,19 @@ function extractDate(metadata: string): Date | null {
   return null;
 }
 
+function detectClipKind(metadata: string): ClipKind {
+  if (NOTE_MARKERS.some(marker => metadata.includes(marker))) {
+    return 'note';
+  }
+  if (HIGHLIGHT_MARKERS.some(marker => metadata.includes(marker))) {
+    return 'highlight';
+  }
+  if (BOOKMARK_MARKERS.some(marker => metadata.includes(marker))) {
+    return 'bookmark';
+  }
+  return 'unknown';
+}
+
 export function parseClippings(content: string): Book[] {
   const rawChunks = content.split(CHUNK_DELIMITER);
   const booksMap = new Map<string, Book>();
@@ -93,8 +112,9 @@ export function parseClippings(content: string): Book[] {
     const title = lines[0].replace(EMAIL_REGEX, '').trim();
     const metadata = lines[1];
     const text = lines.length >= 3 ? lines.slice(2).join('\n') : '';
+    const kind = detectClipKind(metadata);
 
-    // Skip highlights with empty text (bookmarks/notes with no content)
+    // Skip bookmark-only entries and other empty clips with no body text.
     if (text === '') continue;
 
     // Skip Kindle clipping limit placeholder text
@@ -102,7 +122,7 @@ export function parseClippings(content: string): Book[] {
 
     const date = extractDate(metadata);
 
-    const highlight: Highlight = { title, metadata, text, date };
+    const highlight: Highlight = { title, metadata, text, date, kind };
 
     if (!booksMap.has(title)) {
       const book: Book = { title, highlights: [] };
