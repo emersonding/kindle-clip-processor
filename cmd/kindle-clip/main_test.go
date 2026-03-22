@@ -105,6 +105,36 @@ func TestResolveConfiguredPath(t *testing.T) {
 	}
 }
 
+func TestSplitPathAndFlagsAcceptsStdinMarker(t *testing.T) {
+	path, rest := splitPathAndFlags([]string{"-", "--verbose"})
+	if path != "-" {
+		t.Fatalf("expected stdin marker path, got %q", path)
+	}
+	if len(rest) != 1 || rest[0] != "--verbose" {
+		t.Fatalf("expected remaining flags, got %#v", rest)
+	}
+}
+
+func TestResolveClippingsPathHandlesMountedKindleRoot(t *testing.T) {
+	tempDir := t.TempDir()
+	documentsDir := filepath.Join(tempDir, "documents")
+	if err := os.MkdirAll(documentsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	expected := filepath.Join(documentsDir, "My Clippings.txt")
+	if err := os.WriteFile(expected, []byte(""), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	resolved, err := resolveClippingsPath(tempDir, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved != expected {
+		t.Fatalf("expected %s, got %s", expected, resolved)
+	}
+}
+
 func TestRunPrintCommandUsesBookFlag(t *testing.T) {
 	tempDir := t.TempDir()
 	clippingsPath := filepath.Join(tempDir, "My Clippings.txt")

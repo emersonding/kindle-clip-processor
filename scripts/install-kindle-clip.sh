@@ -27,7 +27,7 @@ if [ "$VERSION" = "latest" ]; then
   VERSION="$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" | sed -n 's/.*"tag_name": "\([^"]*\)".*/\1/p' | head -n 1)"
 fi
 
-ARCHIVE="kindle-clip_${VERSION#v}_${OS}_${ARCH}.tar.gz"
+ARCHIVE="kindle-clip_${VERSION}_${OS}_${ARCH}.tar.gz"
 URL="https://github.com/$REPO/releases/download/$VERSION/$ARCHIVE"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT INT TERM

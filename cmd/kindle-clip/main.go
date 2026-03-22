@@ -210,6 +210,9 @@ func splitPathAndFlags(args []string) (string, []string) {
 	if len(args) == 0 {
 		return "", args
 	}
+	if args[0] == "-" {
+		return args[0], args[1:]
+	}
 	if strings.HasPrefix(args[0], "-") {
 		return "", args
 	}
@@ -704,7 +707,12 @@ func resolveClippingsPath(pathArg string, requireFile bool) (string, error) {
 		return "", err
 	}
 	if info.IsDir() {
-		candidate = filepath.Join(candidate, "My Clippings.txt")
+		documentsCandidate := filepath.Join(candidate, "documents", "My Clippings.txt")
+		if _, err := os.Stat(documentsCandidate); err == nil {
+			candidate = documentsCandidate
+		} else {
+			candidate = filepath.Join(candidate, "My Clippings.txt")
+		}
 	}
 	absoluteCandidate, err := filepath.Abs(candidate)
 	if err == nil {
