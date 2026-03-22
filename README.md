@@ -33,20 +33,19 @@ The repo now includes a standalone Go CLI so users can run `kindle-clip ...` dir
 
 ### Install from GitHub Releases
 
-Download published binary:
+Method 1: use the install script:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/emersonding/kindle-clip-processor/master/scripts/install-kindle-clip.sh \
   | KINDLE_CLIP_REPO=emersonding/kindle-clip-processor sh
 ```
 
-The repository includes:
-
-- `.goreleaser.yaml` for building release archives and a Homebrew formula scaffold
-- `scripts/install-kindle-clip.sh` for curl-based installation from GitHub Releases
-
 By default, the installer writes the binary to `~/.local/bin/kindle-clip`. Override that with `KINDLE_CLIP_INSTALL_DIR=/your/bin/path` if needed, and make sure the target directory is on your `PATH`.
 
-The GitHub owner/repo value is shown here using its canonical casing, `EmersonDing/kindle-clip-processor`. GitHub URLs are generally case-insensitive, so `emersonding/kindle-clip-processor` also works, but using the canonical form keeps the docs aligned with the repository name shown on GitHub.
+Method 2: download the archive for your platform directly from the GitHub Releases page, extract it, and move `kindle-clip` into a directory on your `PATH`, such as `/usr/local/bin` on macOS.
+
+The repository includes:
+- `.goreleaser.yaml` for building release archives and a Homebrew formula scaffold
+- `scripts/install-kindle-clip.sh` for curl-based installation from GitHub Releases
 
 ### Build locally
 
