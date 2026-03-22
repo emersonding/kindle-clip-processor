@@ -29,7 +29,7 @@ npm test               # run the TypeScript test suites
 
 ## CLI (`kindle-clip`)
 
-The repo now includes a standalone Go CLI so users can run `kindle-clip ...` directly after installing a binary, without `npm run`, `tsx`, or `./` prefixes.
+The repo now includes a standalone Go CLI so users can run `kindle-clip ...` directly after installing a binary, without `npm run`, `tsx`, or `./` prefixes. The CLI is suitable for quick kindle clipper file process, print processed notes and highlights, do common searches e.g. for selected keyword, date and author, and is ai agent friendly (easy to be directly used by claude code, codex, openclaw, etc.).
 
 ### Install from GitHub Releases
 
