@@ -1,6 +1,6 @@
 {
   "name": "kindle-clip-cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parse, print, search, filter and export Kindle highlights and notes from the command line",
   "author": "Emerson Ding",
   "repository": "https://github.com/emersonding/kindle-clip-processor",
