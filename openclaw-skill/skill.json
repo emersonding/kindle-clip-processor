@@ -31,7 +31,7 @@
   ],
   "requires_installation": true,
   "installation_url": "https://github.com/emersonding/kindle-clip-processor#cli-kindle-clip",
-  "quick_install": "curl -fsSL https://raw.githubusercontent.com/emersonding/kindle-clip-processor/master/scripts/install-kindle-clip.sh | KINDLE_CLIP_REPO=emersonding/kindle-clip-processor sh",
+  "installation_note": "Download from GitHub Releases or build from source. See INSTALL.md for secure installation methods.",
   "commands": [
     "kindle-clip set",
     "kindle-clip list",
