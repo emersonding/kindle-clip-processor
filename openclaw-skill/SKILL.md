@@ -15,29 +15,43 @@ This skill provides the `kindle-clip` CLI tool for processing Kindle's "My Clipp
 
 ## Installation
 
-Before using this skill, install the `kindle-clip` binary:
+Before using this skill, install the `kindle-clip` binary using one of the secure methods below.
 
-### Quick Install (macOS/Linux)
+### Recommended: Download from GitHub Releases
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/emersonding/kindle-clip-processor/master/scripts/install-kindle-clip.sh \
-  | KINDLE_CLIP_REPO=emersonding/kindle-clip-processor sh
-```
+**This is the safest installation method.**
 
-This installs to `~/.local/bin/kindle-clip` by default. Make sure `~/.local/bin` is in your PATH.
+1. Visit [GitHub Releases](https://github.com/emersonding/kindle-clip-processor/releases)
+2. Download the appropriate binary for your platform:
+   - macOS Intel: `kindle-clip_VERSION_darwin_amd64.tar.gz`
+   - macOS Apple Silicon: `kindle-clip_VERSION_darwin_arm64.tar.gz`
+   - Linux: `kindle-clip_VERSION_linux_amd64.tar.gz` or `kindle-clip_VERSION_linux_arm64.tar.gz`
+3. Extract the archive and verify the binary:
+   ```bash
+   tar -xzf kindle-clip_*.tar.gz
+   # Optionally verify checksum from checksums.txt
+   ```
+4. Move `kindle-clip` to a directory in your PATH:
+   ```bash
+   # User directory (no sudo required)
+   mkdir -p ~/.local/bin
+   mv kindle-clip ~/.local/bin/
+   export PATH="$HOME/.local/bin:$PATH"
 
-### Manual Install
+   # Or system-wide (macOS/Linux)
+   sudo mv kindle-clip /usr/local/bin/
+   ```
 
-1. Download the appropriate binary for your platform from [GitHub Releases](https://github.com/emersonding/kindle-clip-processor/releases)
-2. Extract and move `kindle-clip` to a directory in your PATH (e.g., `/usr/local/bin` on macOS)
+### Alternative: Build from Source
 
-### Build from Source
+If you have Go installed and want to build from source:
 
 ```bash
 git clone https://github.com/emersonding/kindle-clip-processor.git
 cd kindle-clip-processor
 go build -o ./bin/kindle-clip ./cmd/kindle-clip
 # Move ./bin/kindle-clip to your PATH
+mv ./bin/kindle-clip ~/.local/bin/
 ```
 
 ## Commands

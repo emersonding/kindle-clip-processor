@@ -10,23 +10,47 @@ This guide helps you install the kindle-clip skill for use with OpenClaw and AI 
 
 ## Step 1: Install the kindle-clip Binary
 
-Choose one of the following installation methods:
+**⚠️ Security Note:** Always verify binaries before installation. Avoid piping remote scripts directly to shell (`curl | sh`) as this can execute untrusted code.
 
-### Option A: Quick Install (Recommended for macOS/Linux)
+Choose one of the following secure installation methods:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/emersonding/kindle-clip-processor/master/scripts/install-kindle-clip.sh \
-  | KINDLE_CLIP_REPO=emersonding/kindle-clip-processor sh
-```
+### Option A: Download from GitHub Releases (Recommended)
 
-This installs the binary to `~/.local/bin/kindle-clip`.
+1. Go to https://github.com/emersonding/kindle-clip-processor/releases
+2. Download the appropriate archive for your platform:
+   - macOS Intel: `kindle-clip_VERSION_darwin_amd64.tar.gz`
+   - macOS Apple Silicon: `kindle-clip_VERSION_darwin_arm64.tar.gz`
+   - Linux: `kindle-clip_VERSION_linux_amd64.tar.gz` or `kindle-clip_VERSION_linux_arm64.tar.gz`
+   - Windows: `kindle-clip_VERSION_windows_amd64.zip` or `kindle-clip_VERSION_windows_arm64.zip`
+3. **Optional but recommended:** Verify the checksum
+   ```bash
+   # Download checksums.txt from the same release
+   # Verify your download matches the published checksum
+   shasum -a 256 kindle-clip_*.tar.gz
+   # Compare with checksums.txt
+   ```
+4. Extract the archive:
+   ```bash
+   tar -xzf kindle-clip_*.tar.gz  # macOS/Linux
+   # or unzip for Windows .zip files
+   ```
+5. Move the `kindle-clip` binary to a directory in your PATH:
+   ```bash
+   # macOS/Linux - user directory (no sudo needed, recommended)
+   mkdir -p ~/.local/bin
+   mv kindle-clip ~/.local/bin/
+   export PATH="$HOME/.local/bin:$PATH"
+
+   # Or system-wide (requires sudo)
+   sudo mv kindle-clip /usr/local/bin/
+   ```
 
 **Verify Installation**:
 ```bash
 kindle-clip --help
 ```
 
-If you get "command not found", add `~/.local/bin` to your PATH:
+If you get "command not found", add the installation directory to your PATH:
 
 ```bash
 # For bash users (add to ~/.bashrc or ~/.bash_profile)
@@ -39,27 +63,7 @@ export PATH="$HOME/.local/bin:$PATH"
 source ~/.bashrc  # or source ~/.zshrc
 ```
 
-### Option B: Manual Install from GitHub Releases
-
-1. Go to https://github.com/emersonding/kindle-clip-processor/releases
-2. Download the appropriate archive for your platform:
-   - macOS Intel: `kindle-clip_VERSION_darwin_amd64.tar.gz`
-   - macOS Apple Silicon: `kindle-clip_VERSION_darwin_arm64.tar.gz`
-   - Linux: `kindle-clip_VERSION_linux_amd64.tar.gz` or `kindle-clip_VERSION_linux_arm64.tar.gz`
-   - Windows: `kindle-clip_VERSION_windows_amd64.zip` or `kindle-clip_VERSION_windows_arm64.zip`
-3. Extract the archive
-4. Move the `kindle-clip` binary to a directory in your PATH:
-   ```bash
-   # macOS/Linux
-   sudo mv kindle-clip /usr/local/bin/
-
-   # Or to user directory (no sudo needed)
-   mkdir -p ~/.local/bin
-   mv kindle-clip ~/.local/bin/
-   export PATH="$HOME/.local/bin:$PATH"
-   ```
-
-### Option C: Build from Source
+### Option B: Build from Source
 
 If you have Go installed:
 
@@ -180,15 +184,12 @@ The Kindle desktop app doesn't export to "My Clippings.txt" format. You need to:
 
 ## Updating the Binary
 
-To update to a newer version:
+To update to a newer version, follow the same installation process:
 
-```bash
-# Using the install script (will overwrite existing)
-curl -fsSL https://raw.githubusercontent.com/emersonding/kindle-clip-processor/master/scripts/install-kindle-clip.sh \
-  | KINDLE_CLIP_REPO=emersonding/kindle-clip-processor sh
-
-# Or manually download and replace the binary
-```
+1. Download the latest release from GitHub Releases
+2. Verify the checksum (recommended)
+3. Extract and replace the existing binary
+4. Verify the new version: `kindle-clip --version`
 
 ## Uninstallation
 

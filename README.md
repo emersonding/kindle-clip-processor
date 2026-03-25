@@ -33,19 +33,32 @@ The repo now includes a standalone Go CLI so users can run `kindle-clip ...` dir
 
 ### Install from GitHub Releases
 
-Method 1: use the install script:
+**Recommended Method:** Download the pre-built binary for your platform:
+
+1. Visit the [GitHub Releases page](https://github.com/emersonding/kindle-clip-processor/releases)
+2. Download the appropriate archive for your platform (darwin/linux/windows, amd64/arm64)
+3. Extract the archive: `tar -xzf kindle-clip_*.tar.gz`
+4. Move `kindle-clip` to a directory on your `PATH`:
+   ```bash
+   mkdir -p ~/.local/bin
+   mv kindle-clip ~/.local/bin/
+   # Add to PATH if needed: export PATH="$HOME/.local/bin:$PATH"
+   ```
+
+**Alternative:** If you prefer to use the install script, inspect it first before running:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/emersonding/kindle-clip-processor/master/scripts/install-kindle-clip.sh \
-  | KINDLE_CLIP_REPO=emersonding/kindle-clip-processor sh
+# Download and inspect the script
+curl -fsSL https://raw.githubusercontent.com/emersonding/kindle-clip-processor/master/scripts/install-kindle-clip.sh -o install.sh
+less install.sh  # Review the script
+# If satisfied, run it:
+KINDLE_CLIP_REPO=emersonding/kindle-clip-processor sh install.sh
 ```
 
-By default, the installer writes the binary to `~/.local/bin/kindle-clip`. Override that with `KINDLE_CLIP_INSTALL_DIR=/your/bin/path` if needed, and make sure the target directory is on your `PATH`.
-
-Method 2: download the archive for your platform directly from the GitHub Releases page, extract it, and move `kindle-clip` into a directory on your `PATH`, such as `/usr/local/bin` on macOS.
+⚠️ **Security Note:** Avoid piping remote scripts directly to shell (`curl | sh`) without inspection, as this can execute untrusted code.
 
 The repository includes:
 - `.goreleaser.yaml` for building release archives and a Homebrew formula scaffold
-- `scripts/install-kindle-clip.sh` for curl-based installation from GitHub Releases
+- `scripts/install-kindle-clip.sh` - optional installation helper (inspect before use)
 
 ### Build locally
 
