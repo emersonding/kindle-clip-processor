@@ -31,9 +31,24 @@ npm test               # run the TypeScript test suites
 
 The repo now includes a standalone Go CLI so users can run `kindle-clip ...` directly after installing a binary, without `npm run`, `tsx`, or `./` prefixes. The CLI is suitable for quick kindle clipper file process, print processed notes and highlights, do common searches e.g. for selected keyword, date and author, and is ai agent friendly (easy to be directly used by claude code, codex, openclaw, etc.).
 
+### Install via Homebrew (Recommended)
+
+```bash
+# Add the tap
+brew tap emersonding/tap
+
+# Install kindle-clip
+brew install kindle-clip
+
+# Verify installation
+kindle-clip help
+```
+
+**Note:** Homebrew requires up-to-date Command Line Tools. If you encounter Command Line Tools errors, use the GitHub Releases method below instead.
+
 ### Install from GitHub Releases
 
-**Recommended Method:** Download the pre-built binary for your platform:
+Download the pre-built binary for your platform (no dependencies required):
 
 1. Visit the [GitHub Releases page](https://github.com/emersonding/kindle-clip-processor/releases)
 2. Download the appropriate archive for your platform (darwin/linux/windows, amd64/arm64)
